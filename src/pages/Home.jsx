@@ -44,19 +44,11 @@ const Home = () => {
         },
         (error) => {
           console.log('[Geo] Ошибка геолокации:', error);
-          // ВРЕМЕННАЯ ЗАГЛУШКА для теста
-          const fallbackCoords = { lat: 43.32, lon: 45.00 };
-          console.log('[Geo] Использую тестовые координаты:', fallbackCoords);
-          setUserLocation(fallbackCoords);
           setGeoError(error.message);
         }
       );
     } else {
       console.log('[Geo] Геолокация не поддерживается браузером');
-      // ВРЕМЕННАЯ ЗАГЛУШКА для теста
-      const fallbackCoords = { lat: 43.32, lon: 45.00 };
-      console.log('[Geo] Использую тестовые координаты:', fallbackCoords);
-      setUserLocation(fallbackCoords);
       setGeoError("Геолокация не поддерживается браузером");
     }
   }, []);
