@@ -35,12 +35,23 @@ const Navbar = () => {
   }, [location.pathname]);
 
   return (
-    <Paper sx={{ position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 100 }} elevation={6}>
+    <Paper sx={{ 
+      position: 'fixed', 
+      bottom: 0,
+      left: 0, 
+      right: 0, 
+      zIndex: 100 
+    }} elevation={6}>
       <BottomNavigation
         showLabels
         value={currentIndex === -1 ? 0 : currentIndex}
         onChange={(_, newValue) => navigate(navItems[newValue].path)}
-        sx={{ borderTop: '1px solid #eee', bgcolor: '#fff', outline: 'none', boxShadow: 'none' }}
+        sx={{ 
+          borderTop: '1px solid #eee',
+          bgcolor: '#fff', 
+          outline: 'none', 
+          boxShadow: 'none' 
+        }}
       >
         {navItems.map((item) => (
           <BottomNavigationAction

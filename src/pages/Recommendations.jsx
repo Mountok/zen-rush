@@ -9,6 +9,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Alert from '@mui/material/Alert';
 import { activitiesAPI, historyAPI } from '../services/api';
 import ActivityCard from '../components/ActivityCard';
+import ResponsiveContainer from '../components/ResponsiveContainer';
 
 function SlideTransition(props) {
   return <Slide {...props} direction="up" />;
@@ -82,14 +83,19 @@ const Recommendations = () => {
     <Box sx={{
       minHeight: '100dvh',
       background: 'linear-gradient(180deg, #F5F5F5 0%, #E6ECEF 100%)',
-      pt: 3,
-      pb: 10,
-      px: 2,
+      pt: { xs: 3, md: 4 },
+      pb: { xs: 10, md: 4 },
+      px: { xs: 2, md: 4 },
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
     }}>
-      <Typography variant="h5" fontWeight={700} sx={{ mb: 2, mt: 1, textAlign: 'center' }}>
+      <Typography variant="h5" fontWeight={700} sx={{ 
+        mb: 2, 
+        mt: 1, 
+        textAlign: 'center',
+        fontSize: { xs: '1.5rem', md: '2rem', lg: '2.5rem' }
+      }}>
         Твои рекомендации
       </Typography>
       
@@ -106,10 +112,21 @@ const Recommendations = () => {
           Нет подходящих вариантов.<br/>Попробуй изменить фильтры!
         </Typography>
       ) : (
-        <Box sx={{ width: '100%', maxWidth: 420, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <ResponsiveContainer maxWidth="xl">
+          <Box sx={{ 
+            width: '100%', 
+            display: 'flex', 
+            flexDirection: { xs: 'column', md: 'row' },
+            flexWrap: { md: 'wrap' },
+            gap: { xs: 2, md: 3 },
+            justifyContent: { md: 'center' }
+          }}>
           {activities.map((activity, idx) => (
             <Slide in direction="up" timeout={350 + idx * 100} key={activity.id || activity.name + idx}>
-              <div>
+              <div style={{ 
+                width: { xs: '100%', md: 'calc(50% - 12px)', lg: 'calc(33.333% - 16px)' },
+                minWidth: { md: 300 }
+              }}>
                 <ActivityCard 
                   activity={activity} 
                   onFavorite={() => handleSnackbar('Добавлено в избранное!')}
@@ -119,7 +136,8 @@ const Recommendations = () => {
               </div>
             </Slide>
           ))}
-        </Box>
+          </Box>
+        </ResponsiveContainer>
       )}
       <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
         <Button

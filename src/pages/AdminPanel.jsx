@@ -167,23 +167,25 @@ const AdminPanel = () => {
     <Box sx={{
       minHeight: '100dvh',
       background: 'linear-gradient(180deg, #F5F5F5 0%, #E6ECEF 100%)',
-      pt: 2,
-      pb: 10,
-      px: 2,
+      pt: { xs: 2, md: 4 },
+      pb: { xs: 10, md: 4 },
+      px: { xs: 2, md: 4 },
     }}>
       <Paper elevation={4} sx={{
-        maxWidth: 1200,
+        maxWidth: { xs: '100%', md: 1200, lg: 1400 },
         mx: 'auto',
         borderRadius: 3,
-        p: 3,
+        p: { xs: 3, md: 4 },
         boxShadow: '0 4px 24px #A3BFFA22',
       }}>
         {/* Заголовок */}
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 3 }}>
           <AdminIcon sx={{ color: '#FFD60A', fontSize: 32 }} />
-          <Typography variant="h4" fontWeight={700} color="#213547">
-            Админ-панель
-          </Typography>
+                  <Typography variant="h4" fontWeight={700} color="#213547" sx={{
+          fontSize: { xs: '1.5rem', md: '2rem', lg: '2.5rem' }
+        }}>
+          Админ-панель
+        </Typography>
           <Chip 
             label={userService.getUserRole()} 
             color="primary" 

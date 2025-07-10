@@ -94,19 +94,19 @@ const Profile = () => {
       width: '100%',
       minHeight: '100dvh',
       background: 'linear-gradient(180deg, #F5F5F5 0%, #E6ECEF 100%)',
-      pt: 2,
-      pb: 8,
-      px: 0,
+      pt: { xs: 2, md: 4 },
+      pb: { xs: 8, md: 4 },
+      px: { xs: 0, md: 4 },
       display: 'flex',
       flexDirection: 'column',
     }}>
       {/* Шапка профиля */}
       <Paper elevation={4} sx={{
         width: '100%',
-        maxWidth: 420,
+        maxWidth: { xs: 420, md: 600, lg: 800 },
         mx: 'auto',
         borderRadius: 2,
-        p: 2,
+        p: { xs: 2, md: 3 },
         mb: 2,
         background: 'linear-gradient(90deg, #F5F5F5 0%, #E6ECEF 100%)',
         display: 'flex',
@@ -132,8 +132,8 @@ const Profile = () => {
         <Chip label={USER.role} size="small" sx={{ bgcolor: '#fff', color: '#4A4039', fontWeight: 600, fontSize: 13 }} />
       </Paper>
       {/* Избранное */}
-      <Box sx={{ width: '100%', maxWidth: 420, mx: 'auto', mb: 2, px: 0 }}>
-        <Typography fontWeight={700} fontSize={18} mb={1} color="#213547">Избранное</Typography>
+      <Box sx={{ width: '100%', maxWidth: { xs: 420, md: 600, lg: 800 }, mx: 'auto', mb: 2, px: 0 }}>
+        <Typography fontWeight={700} fontSize={{ xs: 18, md: 20 }} mb={1} color="#213547">Избранное</Typography>
         
         {loading ? (
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 4 }}>
@@ -146,7 +146,14 @@ const Profile = () => {
         ) : favorites.length === 0 ? (
           <Typography color="#888" fontSize={15} mb={2}>Нет избранных активностей.</Typography>
         ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxHeight: 320, overflowY: 'auto' }}>
+          <Box sx={{ 
+            display: 'flex', 
+            flexDirection: { xs: 'column', md: 'row' },
+            flexWrap: { md: 'wrap' },
+            gap: 2, 
+            maxHeight: { xs: 320, md: 'none' }, 
+            overflowY: { xs: 'auto', md: 'visible' }
+          }}>
             {favorites.map((activity) => (
               <Paper key={activity.id} elevation={2} sx={{
                 borderRadius: 3,
@@ -154,6 +161,8 @@ const Profile = () => {
                 background: 'linear-gradient(90deg, #A3BFFA 0%, #fff 100%)',
                 position: 'relative',
                 boxShadow: '0 2px 12px #A3BFFA22',
+                width: { xs: '100%', md: 'calc(50% - 8px)', lg: 'calc(33.333% - 11px)' },
+                minWidth: { md: 280 }
               }}>
                 <IconButton size="small" onClick={() => handleRemoveFavorite(activity.id)} sx={{ position: 'absolute', top: 6, right: 6, color: '#F4A261' }}>
                   <CloseIcon />
@@ -165,8 +174,8 @@ const Profile = () => {
         )}
       </Box>
       {/* История */}
-      <Box sx={{ width: '100%', maxWidth: 420, mx: 'auto', mb: 2, px: 0 }}>
-        <Typography fontWeight={700} fontSize={18} mb={1} color="#213547">История</Typography>
+      <Box sx={{ width: '100%', maxWidth: { xs: 420, md: 600, lg: 800 }, mx: 'auto', mb: 2, px: 0 }}>
+        <Typography fontWeight={700} fontSize={{ xs: 18, md: 20 }} mb={1} color="#213547">История</Typography>
         {history.length === 0 ? (
           <Typography color="#888" fontSize={15}>Нет истории просмотров.</Typography>
         ) : (

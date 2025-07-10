@@ -91,10 +91,10 @@ const ActivityCard = ({ activity, onFavorite, onRate, onClick }) => {
       elevation={3}
       sx={{
         borderRadius: 4,
-        p: 2.2,
+        p: { xs: 2.2, md: 3 },
         display: 'flex',
         flexDirection: 'column',
-        gap: 1.2,
+        gap: { xs: 1.2, md: 1.5 },
         boxShadow: '0 4px 24px #A3BFFA22',
         transition: 'transform 0.15s, box-shadow 0.15s',
         cursor: onClick ? 'pointer' : 'default',
@@ -103,6 +103,7 @@ const ActivityCard = ({ activity, onFavorite, onRate, onClick }) => {
           boxShadow: onClick ? '0 8px 32px #A3BFFA33' : '0 4px 24px #A3BFFA22',
         },
         minWidth: 0,
+        height: 'fit-content',
       }}
       onClick={onClick}
     >
@@ -112,7 +113,11 @@ const ActivityCard = ({ activity, onFavorite, onRate, onClick }) => {
         }}>
           {getWeatherIcon(weather)}
         </Box>
-        <Typography variant="h6" fontWeight={700} sx={{ flex: 1, fontSize: 18, color: '#213547' }}>{name}</Typography>
+        <Typography variant="h6" fontWeight={700} sx={{ 
+          flex: 1, 
+          fontSize: { xs: 18, md: 20, lg: 22 }, 
+          color: '#213547' 
+        }}>{name}</Typography>
         <IconButton 
           onClick={(e) => {
             e.stopPropagation();
@@ -130,7 +135,13 @@ const ActivityCard = ({ activity, onFavorite, onRate, onClick }) => {
           <FavoriteIcon />
         </IconButton>
       </Box>
-      <Typography variant="body2" sx={{ color: '#4A4039', mb: 0.5, fontSize: 15, minHeight: 20 }}>
+      <Typography variant="body2" sx={{ 
+        color: '#4A4039', 
+        mb: 0.5, 
+        fontSize: { xs: 15, md: 16 }, 
+        minHeight: { xs: 20, md: 24 },
+        lineHeight: 1.4
+      }}>
         {description}
       </Typography>
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 0.5 }}>

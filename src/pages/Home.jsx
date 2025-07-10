@@ -12,6 +12,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import axios from 'axios';
 import { authAPI } from '../services/api';
 import AuthModal from '../components/AuthModal';
+import ResponsiveContainer from '../components/ResponsiveContainer';
 
 const MOOD_OPTIONS = [
   { label: "Очень грустно", color: "#4A90E2" },
@@ -151,15 +152,16 @@ const Home = () => {
       minHeight: '100dvh',
       background: 'linear-gradient(180deg, #F5F5F5 0%, #E6ECEF 100%)',
       overflow: 'hidden',
-      pb: 7,
+      pb: { xs: 7, md: 0 },
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'flex-start',
+      px: { xs: 2, md: 4 },
     }}>
       <Box sx={{
         position: 'absolute',
-        top: 16,
+        top: { xs: 16, md: 24 },
         left: '50%',
         transform: 'translateX(-50%)',
         display: 'flex',
@@ -226,29 +228,34 @@ const Home = () => {
       <Box sx={{
         position: 'relative',
         zIndex: 1,
-        width: '100vw',
+        width: '100%',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100dvh',
-        pt: 6,
+        pt: { xs: 6, md: 8 },
         px: 0,
       }}>
-        <Paper elevation={4} sx={{
-          width: '100%',
-          maxWidth: 420,
-          mx: 'auto',
-          borderRadius: 2.5,
-          p: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 2,
-          boxShadow: '0 4px 24px #A3BFFA22',
-          background: '#fff',
-        }}>
-          <Typography variant="h6" fontWeight={700} sx={{ color: '#213547', mb: 0.5, textAlign: 'center', fontFamily: 'Poppins, sans-serif', fontSize: 19 }}>
+        <ResponsiveContainer maxWidth="md">
+          <Paper elevation={4} sx={{
+            width: '100%',
+            borderRadius: 2.5,
+            p: { xs: 2, md: 4 },
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: { xs: 2, md: 3 },
+            boxShadow: '0 4px 24px #A3BFFA22',
+            background: '#fff',
+          }}>
+          <Typography variant="h6" fontWeight={700} sx={{ 
+            color: '#213547', 
+            mb: 0.5, 
+            textAlign: 'center', 
+            fontFamily: 'Poppins, sans-serif', 
+            fontSize: { xs: 19, md: 24, lg: 28 }
+          }}>
             Куда сходить?
             <br />Получить рекомендации!
           </Typography>
@@ -363,7 +370,8 @@ const Home = () => {
             Получить рекомендации
           </Button>
           {geoError && <Typography color="#e74c3c" mt={1} fontSize={13}>{geoError}</Typography>}
-        </Paper>
+          </Paper>
+        </ResponsiveContainer>
       </Box>
       
       <AuthModal
