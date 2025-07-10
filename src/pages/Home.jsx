@@ -6,7 +6,12 @@ import Slider from '@mui/material/Slider';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
+import IconButton from '@mui/material/IconButton';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import LogoutIcon from '@mui/icons-material/Logout';
 import axios from 'axios';
+import { authAPI } from '../services/api';
+import AuthModal from '../components/AuthModal';
 
 const MOOD_OPTIONS = [
   { label: "Очень грустно", color: "#4A90E2" },
@@ -29,6 +34,8 @@ const Home = () => {
   const [maxBudget, setMaxBudget] = useState(10000);
   const [temperature, setTemperature] = useState(null);
   const [city, setCity] = useState('Город');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -102,12 +109,41 @@ const Home = () => {
     }
   }, [userLocation]);
 
+  // Проверка аутентификации при загрузке
+  useEffect(() => {
+    setIsAuthenticated(authAPI.isAuthenticated());
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+    
     const moodIndex = Math.round(mood);
     navigate("/recommendations", {
-      state: { mood: MOOD_OPTIONS[moodIndex].label, time, minBudget, maxBudget, userLocation },
+      state: { 
+        mood: MOOD_OPTIONS[moodIndex].label, 
+        time, 
+        minBudget, 
+        maxBudget, 
+        userLocation: {
+          ...userLocation,
+          temperature
+        }
+      },
     });
+  };
+
+  const handleAuthSuccess = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    authAPI.logout();
+    setIsAuthenticated(false);
   };
 
   return (
@@ -121,28 +157,66 @@ const Home = () => {
       alignItems: 'center',
       justifyContent: 'flex-start',
     }}>
-      <Paper elevation={3} sx={{
+      <Box sx={{
         position: 'absolute',
         top: 16,
         left: '50%',
         transform: 'translateX(-50%)',
-        borderRadius: 3,
-        px: 2,
-        py: 0.5,
-        bgcolor: '#fff',
-        color: '#4A4039',
         display: 'flex',
         alignItems: 'center',
         gap: 1,
         zIndex: 10,
-        fontSize: 14,
-        width: 'fit-content',
       }}>
-        <Typography variant="body2" fontWeight={600}>
-          ☀️ {city}
-          {temperature !== null ? `: ${temperature}°C` : ""}
-        </Typography>
-      </Paper>
+        <Paper elevation={3} sx={{
+          borderRadius: 3,
+          px: 2,
+          py: 0.5,
+          bgcolor: '#fff',
+          color: '#4A4039',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1,
+          fontSize: 14,
+          width: 'fit-content',
+        }}>
+          <Typography variant="body2" fontWeight={600}>
+            ☀️ {city}
+            {temperature !== null ? `: ${temperature}°C` : ""}
+          </Typography>
+        </Paper>
+        
+        {isAuthenticated ? (
+          <IconButton
+            onClick={handleLogout}
+            sx={{
+              bgcolor: '#fff',
+              color: '#F4A261',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              '&:hover': {
+                bgcolor: '#fff',
+                color: '#E76F51',
+              }
+            }}
+          >
+            <LogoutIcon />
+          </IconButton>
+        ) : (
+          <IconButton
+            onClick={() => setShowAuthModal(true)}
+            sx={{
+              bgcolor: '#fff',
+              color: '#4A90E2',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              '&:hover': {
+                bgcolor: '#fff',
+                color: '#357ABD',
+              }
+            }}
+          >
+            <AccountCircleIcon />
+          </IconButton>
+        )}
+      </Box>
       {/* Волны */}
       <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', zIndex: 0 }}>
         <svg height="80" viewBox="0 0 1440 80" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: '100%' }}>
@@ -291,6 +365,12 @@ const Home = () => {
           {geoError && <Typography color="#e74c3c" mt={1} fontSize={13}>{geoError}</Typography>}
         </Paper>
       </Box>
+      
+      <AuthModal
+        open={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        onSuccess={handleAuthSuccess}
+      />
     </Box>
   );
 };

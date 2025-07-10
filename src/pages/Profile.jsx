@@ -6,13 +6,11 @@ import Avatar from '@mui/material/Avatar';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import CircularProgress from '@mui/material/CircularProgress';
+import Alert from '@mui/material/Alert';
 import ActivityCard from '../components/ActivityCard';
-
-const USER = {
-  name: 'Иван',
-  role: 'Пользователь',
-  status: 'Твой день в твоих руках',
-};
+import { favoritesAPI, historyAPI, authAPI } from '../services/api';
+import { userService } from '../services/userService';
 
 function getInitials(name) {
   return name.split(' ').map(w => w[0]).join('').toUpperCase();
@@ -21,31 +19,74 @@ function getInitials(name) {
 const Profile = () => {
   const [favorites, setFavorites] = useState([]);
   const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Получаем избранные активности из localStorage
+  // Получаем информацию о пользователе
+  const currentUser = userService.getCurrentUser();
+  const USER = {
+    name: currentUser?.username || 'Пользователь',
+    role: currentUser?.role === 'admin' ? 'Администратор' : 
+          currentUser?.role === 'moderator' ? 'Модератор' : 'Пользователь',
+    status: 'Твой день в твоих руках',
+  };
+
+  // Загружаем данные из API
   useEffect(() => {
-    const favs = [];
-    for (let key in localStorage) {
-      if (key.startsWith('fav_') && localStorage.getItem(key) === '1') {
-        const name = key.replace('fav_', '');
-        // Для MVP ищем активность по имени (можно улучшить по id)
-        try {
-          const all = require('../data/activities').activities;
-          const act = all.find(a => a.name === name);
-          if (act) favs.push(act);
-        } catch {}
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError('');
+        
+        console.log('🔄 Загружаем данные профиля...');
+        
+        const [favoritesData, historyData] = await Promise.all([
+          favoritesAPI.getFavorites(),
+          historyAPI.getHistory()
+        ]);
+        
+        console.log('📦 Полученные данные избранного:', favoritesData);
+        console.log('📦 Полученные данные истории:', historyData);
+        
+        // Проверяем, что данные не null/undefined
+        if (favoritesData && Array.isArray(favoritesData)) {
+          setFavorites(favoritesData);
+        } else {
+          console.log('⚠️ Избранное не является массивом, устанавливаем пустой массив');
+          setFavorites([]);
+        }
+        
+        if (historyData && Array.isArray(historyData)) {
+          setHistory(historyData);
+        } else {
+          console.log('⚠️ История не является массивом, устанавливаем пустой массив');
+          setHistory([]);
+        }
+        
+      } catch (err) {
+        console.error('❌ Ошибка загрузки данных профиля:', err);
+        setError('Не удалось загрузить данные профиля');
+        // Устанавливаем пустые массивы при ошибке
+        setFavorites([]);
+        setHistory([]);
+      } finally {
+        setLoading(false);
       }
-    }
-    setFavorites(favs);
-    // История
-    const hist = JSON.parse(localStorage.getItem('history') || '[]');
-    setHistory(hist.slice(-10).reverse());
+    };
+
+    loadData();
   }, []);
 
   // Удалить из избранного
-  const handleRemoveFavorite = (name) => {
-    localStorage.removeItem('fav_' + name);
-    setFavorites(favorites.filter(a => a.name !== name));
+  const handleRemoveFavorite = async (activityId) => {
+    try {
+      console.log('🗑️ Удаляем из избранного:', activityId);
+      await favoritesAPI.removeFromFavorites(activityId);
+      setFavorites(favorites.filter(a => a.id !== activityId));
+      console.log('✅ Успешно удалено из избранного');
+    } catch (err) {
+      console.error('❌ Ошибка удаления из избранного:', err);
+    }
   };
 
   return (
@@ -93,19 +134,28 @@ const Profile = () => {
       {/* Избранное */}
       <Box sx={{ width: '100%', maxWidth: 420, mx: 'auto', mb: 2, px: 0 }}>
         <Typography fontWeight={700} fontSize={18} mb={1} color="#213547">Избранное</Typography>
-        {favorites.length === 0 ? (
+        
+        {loading ? (
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', mt: 4 }}>
+            <CircularProgress sx={{ color: '#FFD60A' }} />
+          </Box>
+        ) : error ? (
+          <Alert severity="error" sx={{ mt: 2, mb: 2 }}>
+            {error}
+          </Alert>
+        ) : favorites.length === 0 ? (
           <Typography color="#888" fontSize={15} mb={2}>Нет избранных активностей.</Typography>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxHeight: 320, overflowY: 'auto' }}>
             {favorites.map((activity) => (
-              <Paper key={activity.name} elevation={2} sx={{
+              <Paper key={activity.id} elevation={2} sx={{
                 borderRadius: 3,
                 p: 1.5,
                 background: 'linear-gradient(90deg, #A3BFFA 0%, #fff 100%)',
                 position: 'relative',
                 boxShadow: '0 2px 12px #A3BFFA22',
               }}>
-                <IconButton size="small" onClick={() => handleRemoveFavorite(activity.name)} sx={{ position: 'absolute', top: 6, right: 6, color: '#F4A261' }}>
+                <IconButton size="small" onClick={() => handleRemoveFavorite(activity.id)} sx={{ position: 'absolute', top: 6, right: 6, color: '#F4A261' }}>
                   <CloseIcon />
                 </IconButton>
                 <ActivityCard activity={activity} />
@@ -121,10 +171,12 @@ const Profile = () => {
           <Typography color="#888" fontSize={15}>Нет истории просмотров.</Typography>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {history.map((item, idx) => (
-              <Box key={item.name + idx} sx={{ display: 'flex', alignItems: 'center', gap: 1, borderBottom: '1px solid #eee', pb: 0.5 }}>
-                <Typography fontWeight={600} color="#4A4039" fontSize={15}>{item.name}</Typography>
-                <Typography color="#888" fontSize={13} ml={1}>{item.date}</Typography>
+            {history.map((activity, idx) => (
+              <Box key={activity.id + idx} sx={{ display: 'flex', alignItems: 'center', gap: 1, borderBottom: '1px solid #eee', pb: 0.5 }}>
+                <Typography fontWeight={600} color="#4A4039" fontSize={15}>{activity.name}</Typography>
+                <Typography color="#888" fontSize={13} ml={1}>
+                  {new Date(activity.created_at).toLocaleDateString('ru-RU')}
+                </Typography>
               </Box>
             ))}
           </Box>

@@ -11,6 +11,7 @@ import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import CloudIcon from '@mui/icons-material/Cloud';
 import UmbrellaIcon from '@mui/icons-material/Umbrella';
 import Paper from '@mui/material/Paper';
+import { favoritesAPI } from '../services/api';
 
 const weatherIcon = {
   sunny: <WbSunnyIcon sx={{ color: '#FFD60A' }} />, // жёлтый
@@ -20,27 +21,62 @@ const weatherIcon = {
 
 const getWeatherIcon = (weather) => weatherIcon[weather] || <WbSunnyIcon sx={{ color: '#FFD60A' }} />;
 
-const ActivityCard = ({ activity, onFavorite, onRate }) => {
-  const { name, description, budget, time, weather } = activity;
-  const favKey = `fav_${name}`;
-  const rateKey = `rate_${name}`;
+const ActivityCard = ({ activity, onFavorite, onRate, onClick }) => {
+  const { id, name, description, budget, time, weather, moods } = activity;
+  const rateKey = `rate_${id || name}`;
   const [favorite, setFavorite] = useState(false);
   const [rating, setRating] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setFavorite(!!localStorage.getItem(favKey));
     setRating(Number(localStorage.getItem(rateKey)) || 0);
     // eslint-disable-next-line
   }, []);
 
-  const handleFavorite = () => {
-    if (favorite) {
-      localStorage.removeItem(favKey);
-      setFavorite(false);
-    } else {
-      localStorage.setItem(favKey, '1');
-      setFavorite(true);
-      if (onFavorite) onFavorite();
+  // Проверяем, есть ли активность в избранном
+  useEffect(() => {
+    const checkFavorite = async () => {
+      try {
+        const favorites = await favoritesAPI.getFavorites();
+        console.log('🔍 Проверяем избранное для активности', id, ':', favorites);
+        
+        // Проверяем, что favorites - это массив
+        if (favorites && Array.isArray(favorites)) {
+          const isFav = favorites.some(fav => fav.id === id);
+          console.log('🔍 Активность в избранном:', isFav);
+          setFavorite(isFav);
+        } else {
+          console.log('⚠️ Избранное не является массивом, устанавливаем false');
+          setFavorite(false);
+        }
+      } catch (err) {
+        console.error('❌ Ошибка проверки избранного:', err);
+        setFavorite(false);
+      }
+    };
+    
+    if (id) {
+      checkFavorite();
+    }
+  }, [id]);
+
+  const handleFavorite = async () => {
+    if (!id) return;
+    
+    setLoading(true);
+    try {
+      if (favorite) {
+        await favoritesAPI.removeFromFavorites(id);
+        setFavorite(false);
+      } else {
+        await favoritesAPI.addToFavorites(id);
+        setFavorite(true);
+        if (onFavorite) onFavorite();
+      }
+    } catch (err) {
+      console.error('Ошибка работы с избранным:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -61,12 +97,14 @@ const ActivityCard = ({ activity, onFavorite, onRate }) => {
         gap: 1.2,
         boxShadow: '0 4px 24px #A3BFFA22',
         transition: 'transform 0.15s, box-shadow 0.15s',
+        cursor: onClick ? 'pointer' : 'default',
         '&:hover': {
-          transform: 'scale(1.025)',
-          boxShadow: '0 8px 32px #A3BFFA33',
+          transform: onClick ? 'scale(1.025)' : 'none',
+          boxShadow: onClick ? '0 8px 32px #A3BFFA33' : '0 4px 24px #A3BFFA22',
         },
         minWidth: 0,
       }}
+      onClick={onClick}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Box sx={{
@@ -75,7 +113,20 @@ const ActivityCard = ({ activity, onFavorite, onRate }) => {
           {getWeatherIcon(weather)}
         </Box>
         <Typography variant="h6" fontWeight={700} sx={{ flex: 1, fontSize: 18, color: '#213547' }}>{name}</Typography>
-        <IconButton onClick={handleFavorite} sx={{ color: favorite ? '#FFD60A' : '#bbb', transition: 'color 0.2s' }}>
+        <IconButton 
+          onClick={(e) => {
+            e.stopPropagation();
+            handleFavorite();
+          }}
+          disabled={loading}
+          sx={{ 
+            color: favorite ? '#FFD60A' : '#bbb', 
+            transition: 'color 0.2s',
+            '&:disabled': {
+              color: '#ddd'
+            }
+          }}
+        >
           <FavoriteIcon />
         </IconButton>
       </Box>
@@ -85,23 +136,29 @@ const ActivityCard = ({ activity, onFavorite, onRate }) => {
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 0.5 }}>
         <Chip icon={<AttachMoneyIcon sx={{ color: '#A3BFFA' }} />} label={`${budget} ₽`} size="small" sx={{ bgcolor: '#F5F8FF', fontWeight: 600 }} />
         <Chip icon={<AccessTimeIcon sx={{ color: '#A9CBA4' }} />} label={`${time} ч`} size="small" sx={{ bgcolor: '#F5F8FF', fontWeight: 600 }} />
-        <Chip icon={getWeatherIcon(weather)} label={weather === 'sunny' ? 'Солнечно' : weather === 'cloudy' ? 'Облачно' : 'Дождь'} size="small" sx={{ bgcolor: '#F5F8FF', fontWeight: 600 }} />
+        <Chip icon={getWeatherIcon(weather)} label={weather === 'sunny' ? 'Солнечно' : weather === 'cloudy' ? 'Облачно' : weather === 'rainy' ? 'Дождь' : 'Любая'} size="small" sx={{ bgcolor: '#F5F8FF', fontWeight: 600 }} />
+        {moods && moods.length > 0 && (
+          <Chip label={moods[0]} size="small" sx={{ bgcolor: '#F5F8FF', fontWeight: 600, color: '#4A4039' }} />
+        )}
       </Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-        {[1,2,3,4,5].map((val) => (
-          <IconButton
-            key={val}
-            size="small"
-            onClick={() => handleRate(val)}
-            sx={{ color: val <= rating ? '#4CD964' : '#bbb', p: 0.5 }}
-          >
-            <StarIcon fontSize="small" />
-          </IconButton>
-        ))}
-        <Typography variant="body2" sx={{ color: '#888', ml: 1, fontSize: 14 }}>
-          Оценить
-        </Typography>
-      </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+          {[1,2,3,4,5].map((val) => (
+            <IconButton
+              key={val}
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleRate(val);
+              }}
+              sx={{ color: val <= rating ? '#4CD964' : '#bbb', p: 0.5 }}
+            >
+              <StarIcon fontSize="small" />
+            </IconButton>
+          ))}
+          <Typography variant="body2" sx={{ color: '#888', ml: 1, fontSize: 14 }}>
+            Оценить
+          </Typography>
+        </Box>
     </Paper>
   );
 };

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тест API ZenRush</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .result { margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 3px; white-space: pre-wrap; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <h1>Тест API ZenRush</h1>
+    
+    <div class="test-section">
+        <h3>1. Тест подключения к API</h3>
+        <button onclick="testConnection()">Проверить подключение</button>
+        <div id="connection-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Регистрация</h3>
+        <input type="text" id="reg-username" placeholder="Имя пользователя" value="testuser">
+        <input type="password" id="reg-password" placeholder="Пароль" value="123456">
+        <button onclick="testRegister()">Зарегистрироваться</button>
+        <div id="register-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Вход в систему</h3>
+        <input type="text" id="login-username" placeholder="Имя пользователя" value="admin">
+        <input type="password" id="login-password" placeholder="Пароль" value="admin123">
+        <button onclick="testLogin()">Войти</button>
+        <div id="login-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Получение активностей</h3>
+        <button onclick="testGetActivities()">Получить активности</button>
+        <div id="activities-result" class="result"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>5. Получение избранного</h3>
+        <button onclick="testGetFavorites()">Получить избранное</button>
+        <div id="favorites-result" class="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        let token = localStorage.getItem('jwt_token');
+
+        function showResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = JSON.stringify(data, null, 2);
+            element.className = `result ${isError ? 'error' : 'success'}`;
+        }
+
+        async function testConnection() {
+            try {
+                const response = await fetch(`${API_BASE}/activities`);
+                if (response.ok) {
+                    showResult('connection-result', { status: 'OK', message: 'API доступен' });
+                } else {
+                    showResult('connection-result', { status: response.status, message: 'API недоступен' }, true);
+                }
+            } catch (error) {
+                showResult('connection-result', { error: error.message }, true);
+            }
+        }
+
+        async function testRegister() {
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    showResult('register-result', data);
+                } else {
+                    showResult('register-result', data, true);
+                }
+            } catch (error) {
+                showResult('register-result', { error: error.message }, true);
+            }
+        }
+
+        async function testLogin() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    token = data.token;
+                    localStorage.setItem('jwt_token', token);
+                    showResult('login-result', { ...data, message: 'Токен сохранен' });
+                } else {
+                    showResult('login-result', data, true);
+                }
+            } catch (error) {
+                showResult('login-result', { error: error.message }, true);
+            }
+        }
+
+        async function testGetActivities() {
+            if (!token) {
+                showResult('activities-result', { error: 'Сначала войдите в систему' }, true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/activities`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    showResult('activities-result', data);
+                } else {
+                    showResult('activities-result', data, true);
+                }
+            } catch (error) {
+                showResult('activities-result', { error: error.message }, true);
+            }
+        }
+
+        async function testGetFavorites() {
+            if (!token) {
+                showResult('favorites-result', { error: 'Сначала войдите в систему' }, true);
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/favorites`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const data = await response.json();
+                if (response.ok) {
+                    showResult('favorites-result', data);
+                } else {
+                    showResult('favorites-result', data, true);
+                }
+            } catch (error) {
+                showResult('favorites-result', { error: error.message }, true);
+            }
+        }
+
+        // Проверяем токен при загрузке
+        if (token) {
+            document.getElementById('login-result').textContent = 'Токен найден: ' + token.substring(0, 20) + '...';
+        }
+    </script>
+</body>
+</html> 

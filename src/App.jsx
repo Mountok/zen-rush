@@ -2,8 +2,11 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Recommendations from './pages/Recommendations';
 import Profile from './pages/Profile';
+import AdminPanel from './pages/AdminPanel';
 import Navbar from './components/Navbar';
 import SplashBanner from './components/SplashBanner';
+import ProtectedRoute from './components/ProtectedRoute';
+import AdminRoute from './components/AdminRoute';
 import { useState, useEffect } from 'react';
 import './App.css';
 
@@ -25,8 +28,21 @@ function App() {
       <div className="app-bg">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/recommendations" element={<Recommendations />} />
-          <Route path="/profile" element={<Profile />} />
+          <Route path="/recommendations" element={
+            <ProtectedRoute>
+              <Recommendations />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin" element={
+            <AdminRoute>
+              <AdminPanel />
+            </AdminRoute>
+          } />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
           <Navbar />
