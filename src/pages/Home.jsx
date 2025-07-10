@@ -136,8 +136,7 @@ const Home = () => {
         gap: 1,
         zIndex: 10,
         fontSize: 14,
-        minWidth: 220,
-        maxWidth: 320,
+        width: 'fit-content',
       }}>
         <Typography variant="body2" fontWeight={600}>
           ☀️ {city}
