@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography';
 import Slider from '@mui/material/Slider';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
+import TextField from '@mui/material/TextField';
 
 const MOOD_OPTIONS = [
   { label: "Очень грустно", color: "#4A90E2" },
@@ -56,14 +57,17 @@ const Home = () => {
   return (
     <Box sx={{
       minHeight: '100dvh',
-      position: 'relative',
       background: 'linear-gradient(180deg, #F5F5F5 0%, #E6ECEF 100%)',
       overflow: 'hidden',
-      pb: 7, // для нижнего меню
+      pb: 7,
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'flex-start',
     }}>
       <Paper elevation={3} sx={{
         position: 'absolute',
-        top: 12,
+        top: 16,
         left: '50%',
         transform: 'translateX(-50%)',
         borderRadius: 3,
@@ -76,6 +80,8 @@ const Home = () => {
         gap: 1,
         zIndex: 10,
         fontSize: 14,
+        minWidth: 220,
+        maxWidth: 320,
       }}>
         <Typography variant="body2" fontWeight={600}>
           ☀️ {userLocation ? `lat: ${userLocation.lat.toFixed(2)}, lon: ${userLocation.lon.toFixed(2)}` : "Грозный"}: 18°C
@@ -90,43 +96,38 @@ const Home = () => {
       <Box sx={{
         position: 'relative',
         zIndex: 1,
+        width: '100vw',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         minHeight: '100dvh',
-        pt: 7,
-        pb: 0,
+        pt: 6,
+        px: 0,
       }}>
-        <Typography variant="h5" fontWeight={700} sx={{
-          color: '#213547',
-          textShadow: '0 2px 8px #fff8, 0 1px 0 #fff',
-          mb: 2,
-          textAlign: 'center',
-          fontFamily: 'Poppins, sans-serif',
-          fontSize: 22,
-          lineHeight: 1.1,
-        }}>
-          Куда сходить? Получи рекомендации!
-        </Typography>
-        <Box component="form" onSubmit={handleSubmit} sx={{
+        <Paper elevation={4} sx={{
           width: '100%',
-          maxWidth: 340,
+          maxWidth: 420,
+          mx: 'auto',
+          borderRadius: 2.5,
+          p: 2,
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          gap: 2.5,
-          background: 'none',
-          boxShadow: 'none',
-          border: 'none',
-          p: 0,
+          gap: 2,
+          boxShadow: '0 4px 24px #A3BFFA22',
+          background: '#fff',
         }}>
+          <Typography variant="h6" fontWeight={700} sx={{ color: '#213547', mb: 0.5, textAlign: 'center', fontFamily: 'Poppins, sans-serif', fontSize: 19 }}>
+            Куда сходить?
+            <br />Получить рекомендации!
+          </Typography>
           {/* Настроение */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, width: '100%' }}>
-            <Typography htmlFor="mood" fontWeight={600} mb={0.2} fontSize={15}>
+          <Box sx={{ width: '100%' }}>
+            <Typography fontWeight={600} fontSize={13} mb={0.2} color="#213547">
               Настроение
             </Typography>
-            <Typography fontSize={17} fontWeight={700} color={getMoodColor(mood)} mb={0.5} minHeight={22}>
+            <Typography fontSize={15} fontWeight={700} color={getMoodColor(mood)} mb={0.2} minHeight={18}>
               {MOOD_OPTIONS[mood].label}
             </Typography>
             <Slider
@@ -138,15 +139,15 @@ const Home = () => {
               step={1}
               marks={false}
               sx={{
-                width: 170,
+                width: '100%',
                 color: getMoodColor(mood),
                 mb: 0,
-                mt: 0.5,
+                mt: 0.2,
                 '& .MuiSlider-thumb': {
                   bgcolor: getMoodColor(mood),
                   border: '2px solid #fff',
-                  width: 18,
-                  height: 18,
+                  width: 14,
+                  height: 14,
                 },
                 '& .MuiSlider-rail': {
                   opacity: 0.3,
@@ -155,13 +156,13 @@ const Home = () => {
                 '& .MuiSlider-track': {
                   bgcolor: getMoodColor(mood),
                 },
-                height: 6,
+                height: 4,
               }}
             />
           </Box>
           {/* Время */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, width: '100%' }}>
-            <Typography htmlFor="time" fontWeight={600} mb={0.2} fontSize={15}>Время (часы)</Typography>
+          <Box sx={{ width: '100%' }}>
+            <Typography fontWeight={600} fontSize={13} mb={0.2} color="#213547">Время (часы)</Typography>
             <Slider
               id="time"
               min={1}
@@ -171,86 +172,65 @@ const Home = () => {
               step={1}
               sx={{
                 color: '#A9CBA4',
-                width: 170,
-                mb: 0.5,
+                width: '100%',
+                mb: 0.2,
                 '& .MuiSlider-thumb': {
-                  width: 18,
-                  height: 18,
+                  width: 14,
+                  height: 14,
                 },
-                height: 6,
+                height: 4,
               }}
             />
-            <Typography textAlign="center" fontWeight={500} fontSize={15}>{time} {time === 1 ? "час" : time < 5 ? "часа" : "часов"}</Typography>
+            <Typography textAlign="center" fontWeight={500} fontSize={13}>{time} {time === 1 ? "час" : time < 5 ? "часа" : "часов"}</Typography>
           </Box>
           {/* Бюджет */}
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5, width: '100%' }}>
-            <Typography htmlFor="budget" fontWeight={600} mb={0.2} fontSize={15}>Бюджет (₽)</Typography>
-            <Box sx={{ display: 'flex', gap: 1, width: '100%', justifyContent: 'center' }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Typography fontSize={13} color="#888">от</Typography>
-                <input
-                  type="number"
-                  min={0}
-                  max={maxBudget}
-                  value={minBudget}
-                  onChange={e => setMinBudget(Number(e.target.value))}
-                  style={{
-                    width: 60,
-                    borderRadius: 6,
-                    border: '1px solid #A3BFFA',
-                    padding: '4px 8px',
-                    fontSize: 15,
-                    outline: 'none',
-                    textAlign: 'center',
-                  }}
-                />
-              </Box>
-              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Typography fontSize={13} color="#888">до</Typography>
-                <input
-                  type="number"
-                  min={minBudget}
-                  max={10000}
-                  value={maxBudget}
-                  onChange={e => setMaxBudget(Number(e.target.value))}
-                  style={{
-                    width: 60,
-                    borderRadius: 6,
-                    border: '1px solid #A3BFFA',
-                    padding: '4px 8px',
-                    fontSize: 15,
-                    outline: 'none',
-                    textAlign: 'center',
-                  }}
-                />
-              </Box>
-            </Box>
+          <Box sx={{ width: '100%', display: 'flex', gap: 1, alignItems: 'center', justifyContent: 'center' }}>
+            <TextField
+              label="от"
+              type="number"
+              size="small"
+              inputProps={{ min: 0, max: maxBudget, style: { textAlign: 'center', fontSize: 13, padding: 4 } }}
+              value={minBudget}
+              onChange={e => setMinBudget(Number(e.target.value))}
+              sx={{ width: 60 }}
+            />
+            <Typography fontWeight={600} color="#888">—</Typography>
+            <TextField
+              label="до"
+              type="number"
+              size="small"
+              inputProps={{ min: minBudget, max: 10000, style: { textAlign: 'center', fontSize: 13, padding: 4 } }}
+              value={maxBudget}
+              onChange={e => setMaxBudget(Number(e.target.value))}
+              sx={{ width: 60 }}
+            />
+            <Typography fontWeight={600} color="#888">₽</Typography>
           </Box>
-          {/* Кнопка */}
           <Button
             type="submit"
             variant="contained"
             sx={{
-              borderRadius: 6,
-              background: '#4CD964',
-              color: '#fff',
+              borderRadius: 4,
+              background: '#FFD60A',
+              color: '#213547',
               fontWeight: 700,
-              fontSize: 17,
-              py: 1,
-              boxShadow: '0 2px 12px rgba(169,203,164,0.18)',
-              mt: 1,
-              textShadow: '0 1px 4px #0002',
-              width: 170,
-              minHeight: 38,
+              fontSize: 15,
+              py: 0.7,
+              boxShadow: '0 2px 12px #FFD60A22',
+              textShadow: '0 1px 4px #fff8',
+              width: '100%',
+              mt: 0.5,
+              minHeight: 36,
               '&:hover': {
-                background: '#43c85a',
+                background: '#FFE066',
               },
             }}
+            onClick={handleSubmit}
           >
             Получить рекомендации
           </Button>
-        </Box>
-        {geoError && <Typography color="#e74c3c" mt={1}>{geoError}</Typography>}
+          {geoError && <Typography color="#e74c3c" mt={1} fontSize={13}>{geoError}</Typography>}
+        </Paper>
       </Box>
     </Box>
   );
