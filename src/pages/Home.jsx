@@ -28,6 +28,7 @@ const Home = () => {
   const [minBudget, setMinBudget] = useState(0);
   const [maxBudget, setMaxBudget] = useState(10000);
   const [temperature, setTemperature] = useState(null);
+  const [city, setCity] = useState('Город');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -83,6 +84,24 @@ const Home = () => {
     }
   }, [userLocation]);
 
+  useEffect(() => {
+    if (userLocation) {
+      // Получение города через Geoapify
+      const fetchCity = async () => {
+        const apiKey = '1b8c4d845762401eadc02ee91389b1ff';
+        const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${userLocation.lat}&lon=${userLocation.lon}&type=city&lang=ru&apiKey=${apiKey}`;
+        try {
+          const response = await axios.get(url);
+          const cityName = response.data.features[0]?.properties?.city;
+          setCity(cityName || 'Город');
+        } catch (err) {
+          setCity('Город');
+        }
+      };
+      fetchCity();
+    }
+  }, [userLocation]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
     const moodIndex = Math.round(mood);
@@ -121,7 +140,7 @@ const Home = () => {
         maxWidth: 320,
       }}>
         <Typography variant="body2" fontWeight={600}>
-          ☀️ {userLocation ? `lat: ${userLocation.lat.toFixed(2)}, lon: ${userLocation.lon.toFixed(2)}` : "Грозный"}
+          ☀️ {city}
           {temperature !== null ? `: ${temperature}°C` : ""}
         </Typography>
       </Paper>
