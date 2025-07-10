@@ -6,6 +6,7 @@ import Slider from '@mui/material/Slider';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
+import axios from 'axios';
 
 const MOOD_OPTIONS = [
   { label: "Очень грустно", color: "#4A90E2" },
@@ -22,13 +23,15 @@ const getMoodColor = (moodIndex) => MOOD_OPTIONS[moodIndex]?.color || "#A9CBA4";
 const Home = () => {
   const [userLocation, setUserLocation] = useState(null);
   const [geoError, setGeoError] = useState(null);
-  const [mood, setMood] = useState(3); // по умолчанию "Нейтрально"
+  const [mood, setMood] = useState(3.0); // по умолчанию "Нейтрально"
   const [time, setTime] = useState(1);
   const [minBudget, setMinBudget] = useState(0);
   const [maxBudget, setMaxBudget] = useState(10000);
+  const [temperature, setTemperature] = useState(null);
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log('[Geo] useEffect запущен');
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -36,21 +39,63 @@ const Home = () => {
             lat: position.coords.latitude,
             lon: position.coords.longitude,
           };
+          console.log('[Geo] Получены координаты:', coords);
           setUserLocation(coords);
         },
         (error) => {
+          console.log('[Geo] Ошибка геолокации:', error);
+          // ВРЕМЕННАЯ ЗАГЛУШКА для теста
+          const fallbackCoords = { lat: 43.32, lon: 45.00 };
+          console.log('[Geo] Использую тестовые координаты:', fallbackCoords);
+          setUserLocation(fallbackCoords);
           setGeoError(error.message);
         }
       );
     } else {
+      console.log('[Geo] Геолокация не поддерживается браузером');
+      // ВРЕМЕННАЯ ЗАГЛУШКА для теста
+      const fallbackCoords = { lat: 43.32, lon: 45.00 };
+      console.log('[Geo] Использую тестовые координаты:', fallbackCoords);
+      setUserLocation(fallbackCoords);
       setGeoError("Геолокация не поддерживается браузером");
     }
   }, []);
 
+  useEffect(() => {
+    console.log('[Geo] userLocation изменился:', userLocation);
+  }, [userLocation]);
+
+  useEffect(() => {
+    console.log('[Geo] geoError изменился:', geoError);
+  }, [geoError]);
+
+  useEffect(() => {
+    if (userLocation) {
+      const fetchWeather = async () => {
+        const accessKey = 'c482ac0a-4de8-4540-a232-da6c72b6d770';
+        const headers = {
+          'X-Yandex-Weather-Key': accessKey
+        };
+        const url = `https://api.weather.yandex.ru/v2/forecast?lat=${userLocation.lat}&lon=${userLocation.lon}`;
+        try {
+          console.log('[Weather] Запрос:', url, headers);
+          const response = await axios.get(url, { headers });
+          console.log('[Weather] Ответ:', response.data);
+          setTemperature(Math.round(response.data.fact.temp));
+        } catch (err) {
+          console.log('[Weather] Ошибка:', err);
+          setTemperature(null);
+        }
+      };
+      fetchWeather();
+    }
+  }, [userLocation]);
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    const moodIndex = Math.round(mood);
     navigate("/recommendations", {
-      state: { mood: MOOD_OPTIONS[mood].label, time, minBudget, maxBudget, userLocation },
+      state: { mood: MOOD_OPTIONS[moodIndex].label, time, minBudget, maxBudget, userLocation },
     });
   };
 
@@ -84,7 +129,8 @@ const Home = () => {
         maxWidth: 320,
       }}>
         <Typography variant="body2" fontWeight={600}>
-          ☀️ {userLocation ? `lat: ${userLocation.lat.toFixed(2)}, lon: ${userLocation.lon.toFixed(2)}` : "Грозный"}: 18°C
+          ☀️ {userLocation ? `lat: ${userLocation.lat.toFixed(2)}, lon: ${userLocation.lon.toFixed(2)}` : "Грозный"}
+          {temperature !== null ? `: ${temperature}°C` : ""}
         </Typography>
       </Paper>
       {/* Волны */}
@@ -127,8 +173,8 @@ const Home = () => {
             <Typography fontWeight={600} fontSize={13} mb={0.2} color="#213547">
               Настроение
             </Typography>
-            <Typography fontSize={15} fontWeight={700} color={getMoodColor(mood)} mb={0.2} minHeight={18}>
-              {MOOD_OPTIONS[mood].label}
+            <Typography fontSize={15} fontWeight={700} color={getMoodColor(Math.round(mood))} mb={0.2} minHeight={18}>
+              {MOOD_OPTIONS[Math.round(mood)].label}
             </Typography>
             <Slider
               id="mood"
@@ -136,25 +182,28 @@ const Home = () => {
               max={MOOD_OPTIONS.length - 1}
               value={mood}
               onChange={(_, val) => setMood(Number(val))}
-              step={1}
+              step={0.01}
               marks={false}
               sx={{
                 width: '100%',
-                color: getMoodColor(mood),
+                color: getMoodColor(Math.round(mood)),
                 mb: 0,
                 mt: 0.2,
                 '& .MuiSlider-thumb': {
-                  bgcolor: getMoodColor(mood),
+                  bgcolor: getMoodColor(Math.round(mood)),
                   border: '2px solid #fff',
                   width: 14,
                   height: 14,
+                  transition: 'background 0.3s, border-color 0.3s',
                 },
                 '& .MuiSlider-rail': {
                   opacity: 0.3,
-                  bgcolor: getMoodColor(mood),
+                  bgcolor: getMoodColor(Math.round(mood)),
+                  transition: 'background 0.3s',
                 },
                 '& .MuiSlider-track': {
-                  bgcolor: getMoodColor(mood),
+                  bgcolor: getMoodColor(Math.round(mood)),
+                  transition: 'background 0.3s',
                 },
                 height: 4,
               }}

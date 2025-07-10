@@ -21,17 +21,17 @@ function App() {
 
   return (
     <>
-      <BrowserRouter>
-        <div className="app-bg">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/recommendations" element={<Recommendations />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+    <BrowserRouter>
+      <div className="app-bg">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/recommendations" element={<Recommendations />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
           <Navbar />
-        </div>
-      </BrowserRouter>
+      </div>
+    </BrowserRouter>
       {showSplash && <SplashBanner hide={hideSplash} />}
     </>
   );
