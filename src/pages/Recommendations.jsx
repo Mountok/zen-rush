@@ -18,7 +18,11 @@ function SlideTransition(props) {
 const Recommendations = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { mood, time, minBudget, maxBudget, userLocation } = location.state || {};
+  const { mood, time, peopleCount, minBudget, maxBudget, userLocation, useWeather } = location.state || {};
+  
+  // Отладочная информация
+  console.log('📥 Полученные данные из состояния:', location.state);
+  console.log('🔍 Распарсенные параметры:', { mood, time, peopleCount, minBudget, maxBudget });
   
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,17 +43,45 @@ const Recommendations = () => {
         setLoading(true);
         setError('');
         
-        const filters = {
-          time: time,
-          minBudget: minBudget,
-          maxBudget: maxBudget,
-          mood: mood,
-          weather: userLocation ? getWeatherType(userLocation.temperature) : 'any'
-        };
+        // Создаем объект фильтров только с активными параметрами
+        const filters = {};
+        
+        // Добавляем только те фильтры, которые не null/undefined и не пустые строки
+        if (time !== null && time !== undefined && time !== '') {
+          console.log('⏰ Добавляем фильтр времени:', time);
+          filters.time = time;
+        }
+        if (peopleCount !== null && peopleCount !== undefined && peopleCount !== '') {
+          console.log('👥 Добавляем фильтр людей:', peopleCount);
+          filters.peopleCount = peopleCount;
+        }
+        if (minBudget !== null && minBudget !== undefined && minBudget !== '') {
+          console.log('💰 Добавляем фильтр мин. бюджета:', minBudget);
+          filters.minBudget = minBudget;
+        }
+        if (maxBudget !== null && maxBudget !== undefined && maxBudget !== '') {
+          console.log('💰 Добавляем фильтр макс. бюджета:', maxBudget);
+          filters.maxBudget = maxBudget;
+        }
+        if (mood !== null && mood !== undefined && mood !== '') {
+          console.log('😊 Добавляем фильтр настроения:', mood);
+          filters.mood = mood;
+        }
+        
+        // Погода добавляется только если включена и есть данные о местоположении
+        if (useWeather && userLocation) {
+          filters.weather = getWeatherType(userLocation.temperature);
+          console.log('🌤️ Добавляем фильтр погоды:', filters.weather);
+        } else {
+          console.log('🌤️ Погода отключена или нет данных о местоположении');
+        }
 
         console.log('🚀 Отправляем запрос с фильтрами:', filters);
+        console.log('📋 Исходные параметры:', { time, peopleCount, minBudget, maxBudget, mood });
+        console.log('👥 Количество людей:', peopleCount);
         console.log('🌡️ Температура:', userLocation?.temperature);
         console.log('🌤️ Определенная погода:', getWeatherType(userLocation?.temperature));
+        console.log('🔍 Количество активных фильтров:', Object.keys(filters).length);
 
         const data = await activitiesAPI.getActivities(filters);
         console.log('📦 Полученные данные:', data);
@@ -65,7 +97,7 @@ const Recommendations = () => {
     };
 
     fetchActivities();
-  }, [mood, time, minBudget, maxBudget, userLocation]);
+  }, [mood, time, peopleCount, minBudget, maxBudget, userLocation]);
 
   const handleSnackbar = (message) => {
     setSnackbar({ open: true, message });

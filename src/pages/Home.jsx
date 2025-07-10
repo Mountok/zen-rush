@@ -15,6 +15,9 @@ import SentimentNeutralIcon from '@mui/icons-material/SentimentNeutral';
 import SentimentSatisfiedIcon from '@mui/icons-material/SentimentSatisfied';
 import SentimentVerySatisfiedIcon from '@mui/icons-material/SentimentVerySatisfied';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import GroupIcon from '@mui/icons-material/Group';
+import ClearIcon from '@mui/icons-material/Clear';
+import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import axios from 'axios';
 import { authAPI } from '../services/api';
 import AuthModal from '../components/AuthModal';
@@ -38,6 +41,13 @@ const TIME_OPTIONS = [
   { value: 8, label: "8 часов" },
 ];
 
+const PEOPLE_OPTIONS = [
+  { value: 1, label: "1 человек" },
+  { value: 2, label: "2 человека" },
+  { value: 4, label: "4 человека" },
+  { value: 6, label: "6+ человек" },
+];
+
 const getMoodColor = (moodIndex) => MOOD_OPTIONS[moodIndex]?.color || "#A9CBA4";
 
 const Home = () => {
@@ -45,8 +55,18 @@ const Home = () => {
   const [geoError, setGeoError] = useState(null);
   const [mood, setMood] = useState(3.0); // по умолчанию "Нейтрально"
   const [time, setTime] = useState(2);
+  const [peopleCount, setPeopleCount] = useState(2); // по умолчанию для двоих
   const [minBudget, setMinBudget] = useState(0);
   const [maxBudget, setMaxBudget] = useState(2000);
+  
+  // Состояние для отслеживания активных фильтров
+  const [activeFilters, setActiveFilters] = useState({
+    mood: true,
+    time: true,
+    people: true,
+    budget: true,
+    weather: true
+  });
   const [temperature, setTemperature] = useState(null);
   const [city, setCity] = useState('Город');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -138,18 +158,24 @@ const Home = () => {
     }
     
     const moodIndex = Math.round(mood);
-    navigate("/recommendations", {
-      state: { 
-        mood: MOOD_OPTIONS[moodIndex].label, 
-        time, 
-        minBudget, 
-        maxBudget, 
-        userLocation: {
+    const stateData = { 
+      mood: activeFilters.mood ? MOOD_OPTIONS[moodIndex].label : null, 
+      time: activeFilters.time ? time : null, 
+      peopleCount: activeFilters.people ? peopleCount : null,
+      minBudget: activeFilters.budget ? minBudget : null, 
+      maxBudget: activeFilters.budget ? maxBudget : null, 
+              userLocation: {
           ...userLocation,
           temperature
-        }
-      },
-    });
+        },
+        useWeather: activeFilters.weather
+    };
+    
+    console.log('🚀 Передаем данные в Recommendations:', stateData);
+    console.log('📋 Активные фильтры:', activeFilters);
+    console.log('🎯 Исходные значения:', { mood: moodIndex, time, peopleCount, minBudget, maxBudget });
+    
+    navigate("/recommendations", { state: stateData });
   };
 
   const handleAuthSuccess = () => {
@@ -271,15 +297,35 @@ const Home = () => {
           </Box>
 
           {/* Настроение */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h6" sx={{ 
-              color: '#fff', 
-              mb: 3,
-              fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
-              textShadow: '0 1px 5px rgba(0,0,0,0.3)'
+          {activeFilters.mood && (
+            <Box sx={{ mb: 4 }}>
+            <Box sx={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'space-between',
+              mb: 3
             }}>
-              Как твое настроение?
-            </Typography>
+              <Typography variant="h6" sx={{ 
+                color: '#fff', 
+                fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
+                textShadow: '0 1px 5px rgba(0,0,0,0.3)'
+              }}>
+                Как твое настроение?
+              </Typography>
+              {activeFilters.mood && (
+                <IconButton
+                  onClick={() => setActiveFilters(prev => ({ ...prev, mood: false }))}
+                  sx={{
+                    color: '#fff',
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' }
+                  }}
+                  size="small"
+                >
+                  <ClearIcon fontSize="small" />
+                </IconButton>
+              )}
+            </Box>
             
             {/* Анимированная иконка настроения */}
             <Box sx={{ 
@@ -381,17 +427,36 @@ const Home = () => {
               />
             </Box>
           </Box>
+          )}
 
           {/* Время */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h6" sx={{ 
-              color: '#fff', 
-              mb: 3,
-              fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
-              textShadow: '0 1px 5px rgba(0,0,0,0.3)'
-            }}>
-              Сколько времени у тебя есть?
-            </Typography>
+          {activeFilters.time && (
+            <Box sx={{ mb: 4 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'space-between',
+                mb: 3
+              }}>
+                <Typography variant="h6" sx={{ 
+                  color: '#fff', 
+                  fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
+                  textShadow: '0 1px 5px rgba(0,0,0,0.3)'
+                }}>
+                  Сколько времени у тебя есть?
+                </Typography>
+                <IconButton
+                  onClick={() => setActiveFilters(prev => ({ ...prev, time: false }))}
+                  sx={{
+                    color: '#fff',
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' }
+                  }}
+                  size="small"
+                >
+                  <ClearIcon fontSize="small" />
+                </IconButton>
+              </Box>
             <Box sx={{ 
               display: 'flex', 
               flexWrap: 'wrap', 
@@ -439,17 +504,114 @@ const Home = () => {
               ))}
             </Box>
           </Box>
+          )}
+
+          {/* Количество людей */}
+          {activeFilters.people && (
+            <Box sx={{ mb: 4 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'space-between',
+                mb: 3
+              }}>
+                <Typography variant="h6" sx={{ 
+                  color: '#fff', 
+                  fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
+                  textShadow: '0 1px 5px rgba(0,0,0,0.3)'
+                }}>
+                  Сколько человек?
+                </Typography>
+                <IconButton
+                  onClick={() => setActiveFilters(prev => ({ ...prev, people: false }))}
+                  sx={{
+                    color: '#fff',
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' }
+                  }}
+                  size="small"
+                >
+                  <ClearIcon fontSize="small" />
+                </IconButton>
+              </Box>
+            <Box sx={{ 
+              display: 'flex', 
+              flexWrap: 'wrap', 
+              gap: 2, 
+              justifyContent: 'center' 
+            }}>
+              {PEOPLE_OPTIONS.map((option) => (
+                <Paper
+                  key={option.value}
+                  elevation={peopleCount === option.value ? 8 : 2}
+                  sx={{
+                    p: 2,
+                    borderRadius: 3,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    bgcolor: peopleCount === option.value ? '#FF6B6B' : 'rgba(255,255,255,0.9)',
+                    backdropFilter: 'blur(10px)',
+                    border: peopleCount === option.value ? '2px solid #FF6B6B' : '2px solid transparent',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
+                    }
+                  }}
+                  onClick={() => setPeopleCount(option.value)}
+                >
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    gap: 1 
+                  }}>
+                    <GroupIcon sx={{ 
+                      color: peopleCount === option.value ? '#fff' : '#FF6B6B',
+                      fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' }
+                    }} />
+                    <Typography sx={{ 
+                      fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' },
+                      fontWeight: 600,
+                      color: peopleCount === option.value ? '#fff' : '#333',
+                      textAlign: 'center'
+                    }}>
+                      {option.label}
+                    </Typography>
+                  </Box>
+                </Paper>
+              ))}
+            </Box>
+          </Box>
+          )}
 
           {/* Бюджет */}
-          <Box sx={{ mb: 4 }}>
-            <Typography variant="h6" sx={{ 
-              color: '#fff', 
-              mb: 3,
-              fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
-              textShadow: '0 1px 5px rgba(0,0,0,0.3)'
-            }}>
-              Какой бюджет?
-            </Typography>
+          {activeFilters.budget && (
+            <Box sx={{ mb: 4 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'space-between',
+                mb: 3
+              }}>
+                <Typography variant="h6" sx={{ 
+                  color: '#fff', 
+                  fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
+                  textShadow: '0 1px 5px rgba(0,0,0,0.3)'
+                }}>
+                  Какой бюджет?
+                </Typography>
+                <IconButton
+                  onClick={() => setActiveFilters(prev => ({ ...prev, budget: false }))}
+                  sx={{
+                    color: '#fff',
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' }
+                  }}
+                  size="small"
+                >
+                  <ClearIcon fontSize="small" />
+                </IconButton>
+              </Box>
             <Box sx={{ 
               display: 'flex', 
               gap: 2, 
@@ -563,8 +725,152 @@ const Home = () => {
               </Typography>
             </Box>
           </Box>
+          )}
 
-          {/* Кнопка */}
+          {/* Погода */}
+          {activeFilters.weather && (
+            <Box sx={{ mb: 4 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'space-between',
+                mb: 3
+              }}>
+                <Typography variant="h6" sx={{ 
+                  color: '#fff', 
+                  fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
+                  textShadow: '0 1px 5px rgba(0,0,0,0.3)'
+                }}>
+                  Учитывать погоду?
+                </Typography>
+                <IconButton
+                  onClick={() => setActiveFilters(prev => ({ ...prev, weather: false }))}
+                  sx={{
+                    color: '#fff',
+                    bgcolor: 'rgba(255,255,255,0.2)',
+                    '&:hover': { bgcolor: 'rgba(255,255,255,0.3)' }
+                  }}
+                  size="small"
+                >
+                  <ClearIcon fontSize="small" />
+                </IconButton>
+              </Box>
+              
+              <Box sx={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                gap: 2
+              }}>
+                <Paper
+                  elevation={3}
+                  sx={{
+                    p: 2,
+                    borderRadius: 3,
+                    bgcolor: 'rgba(255,255,255,0.9)',
+                    backdropFilter: 'blur(10px)',
+                    border: '2px solid transparent',
+                    transition: 'all 0.3s ease',
+                    '&:hover': {
+                      transform: 'translateY(-2px)',
+                      boxShadow: '0 8px 25px rgba(0,0,0,0.2)',
+                    }
+                  }}
+                >
+                  <Box sx={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center', 
+                    gap: 1 
+                  }}>
+                    <WbSunnyIcon sx={{ 
+                      color: '#FFD60A',
+                      fontSize: { xs: '1.5rem', md: '2rem' }
+                    }} />
+                    <Typography sx={{ 
+                      fontSize: { xs: '0.8rem', md: '0.9rem' },
+                      fontWeight: 600,
+                      color: '#333',
+                      textAlign: 'center'
+                    }}>
+                      {temperature !== null ? `${temperature}°C` : 'Определяется...'}
+                    </Typography>
+                    <Typography sx={{ 
+                      fontSize: { xs: '0.7rem', md: '0.8rem' },
+                      color: '#666',
+                      textAlign: 'center'
+                    }}>
+                      {city}
+                    </Typography>
+                  </Box>
+                </Paper>
+              </Box>
+            </Box>
+          )}
+
+          {/* Кнопки управления фильтрами */}
+          <Box sx={{ 
+            display: 'flex', 
+            gap: 2, 
+            justifyContent: 'center', 
+            mb: 3,
+            flexWrap: 'wrap'
+          }}>
+            <Button
+              variant="outlined"
+              size="medium"
+              onClick={() => setActiveFilters({
+                mood: false,
+                time: false,
+                people: false,
+                budget: false,
+                weather: false
+              })}
+              sx={{
+                borderRadius: 3,
+                borderColor: 'rgba(255,255,255,0.5)',
+                color: '#fff',
+                fontWeight: 600,
+                fontSize: { xs: '0.8rem', md: '0.9rem' },
+                px: 2,
+                py: 1,
+                '&:hover': { 
+                  borderColor: 'rgba(255,255,255,0.8)',
+                  bgcolor: 'rgba(255,255,255,0.1)'
+                },
+              }}
+            >
+              Сбросить все фильтры
+            </Button>
+            <Button
+              variant="outlined"
+              size="medium"
+              onClick={() => setActiveFilters({
+                mood: true,
+                time: true,
+                people: true,
+                budget: true,
+                weather: true
+              })}
+              sx={{
+                borderRadius: 3,
+                borderColor: 'rgba(255,255,255,0.5)',
+                color: '#fff',
+                fontWeight: 600,
+                fontSize: { xs: '0.8rem', md: '0.9rem' },
+                px: 2,
+                py: 1,
+                '&:hover': { 
+                  borderColor: 'rgba(255,255,255,0.8)',
+                  bgcolor: 'rgba(255,255,255,0.1)'
+                },
+              }}
+            >
+              Восстановить все фильтры
+            </Button>
+          </Box>
+
+          {/* Кнопка поиска */}
           <Box sx={{ textAlign: 'center' }}>
             <Button
               variant="contained"

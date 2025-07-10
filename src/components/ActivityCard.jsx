@@ -10,6 +10,7 @@ import StarIcon from '@mui/icons-material/Star';
 import WbSunnyIcon from '@mui/icons-material/WbSunny';
 import CloudIcon from '@mui/icons-material/Cloud';
 import UmbrellaIcon from '@mui/icons-material/Umbrella';
+import GroupIcon from '@mui/icons-material/Group';
 import Paper from '@mui/material/Paper';
 import { favoritesAPI } from '../services/api';
 
@@ -22,7 +23,7 @@ const weatherIcon = {
 const getWeatherIcon = (weather) => weatherIcon[weather] || <WbSunnyIcon sx={{ color: '#FFD60A' }} />;
 
 const ActivityCard = ({ activity, onFavorite, onRate, onClick }) => {
-  const { id, name, description, budget, time, weather, moods } = activity;
+  const { id, name, description, budget, time, weather, moods, people_count } = activity;
   const rateKey = `rate_${id || name}`;
   const [favorite, setFavorite] = useState(false);
   const [rating, setRating] = useState(0);
@@ -147,6 +148,9 @@ const ActivityCard = ({ activity, onFavorite, onRate, onClick }) => {
       <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 0.5 }}>
         <Chip icon={<AttachMoneyIcon sx={{ color: '#A3BFFA' }} />} label={`${budget} ₽`} size="small" sx={{ bgcolor: '#F5F8FF', fontWeight: 600 }} />
         <Chip icon={<AccessTimeIcon sx={{ color: '#A9CBA4' }} />} label={`${time} ч`} size="small" sx={{ bgcolor: '#F5F8FF', fontWeight: 600 }} />
+        {people_count && (
+          <Chip icon={<GroupIcon sx={{ color: '#FF6B6B' }} />} label={`${people_count} чел`} size="small" sx={{ bgcolor: '#F5F8FF', fontWeight: 600 }} />
+        )}
         <Chip icon={getWeatherIcon(weather)} label={weather === 'sunny' ? 'Солнечно' : weather === 'cloudy' ? 'Облачно' : weather === 'rainy' ? 'Дождь' : 'Любая'} size="small" sx={{ bgcolor: '#F5F8FF', fontWeight: 600 }} />
         {moods && moods.length > 0 && (
           <Chip label={moods[0]} size="small" sx={{ bgcolor: '#F5F8FF', fontWeight: 600, color: '#4A4039' }} />

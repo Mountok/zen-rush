@@ -79,15 +79,18 @@ export const activitiesAPI = {
   getActivities: async (filters = {}) => {
     const params = new URLSearchParams();
     
-    if (filters.minBudget !== undefined) params.append('min_budget', filters.minBudget);
-    if (filters.maxBudget !== undefined) params.append('max_budget', filters.maxBudget);
-    if (filters.time !== undefined) params.append('time', filters.time);
-    if (filters.mood !== undefined) params.append('mood', filters.mood);
-    if (filters.weather !== undefined) params.append('weather', filters.weather);
+    if (filters.minBudget !== undefined && filters.minBudget !== null) params.append('min_budget', filters.minBudget);
+    if (filters.maxBudget !== undefined && filters.maxBudget !== null) params.append('max_budget', filters.maxBudget);
+    if (filters.time !== undefined && filters.time !== null) params.append('time', filters.time);
+    if (filters.peopleCount !== undefined && filters.peopleCount !== null) params.append('people_count', filters.peopleCount);
+    if (filters.mood !== undefined && filters.mood !== null) params.append('mood', filters.mood);
+    if (filters.weather !== undefined && filters.weather !== null) params.append('weather', filters.weather);
 
     const url = `/activities?${params.toString()}`;
     console.log('🔗 Отправляем запрос на:', API_BASE_URL + url);
     console.log('📋 Параметры фильтрации:', Object.fromEntries(params));
+    console.log('🔍 Количество параметров в URL:', params.toString().split('&').length);
+    console.log('📝 Полный URL запроса:', API_BASE_URL + url);
 
     const response = await api.get(url);
     console.log('✅ Ответ от сервера:', response.data);
