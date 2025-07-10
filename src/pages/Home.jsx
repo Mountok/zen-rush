@@ -275,7 +275,7 @@ const Home = () => {
             <Typography variant="h6" sx={{ 
               color: '#fff', 
               mb: 3,
-              fontSize: { xs: '1.2rem', md: '1.4rem' },
+              fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
               textShadow: '0 1px 5px rgba(0,0,0,0.3)'
             }}>
               Как твое настроение?
@@ -301,7 +301,7 @@ const Home = () => {
               }}>
                 <Box sx={{
                   color: getMoodColor(Math.round(mood)),
-                  fontSize: { xs: '6rem', md: '7rem' },
+                  fontSize: { xs: '4rem', sm: '5rem', md: '6rem', lg: '7rem' },
                   transition: 'all 0.3s ease',
                   animation: 'pulse 2s infinite',
                   display: 'flex',
@@ -329,10 +329,10 @@ const Home = () => {
               }}>
                 <Typography fontSize={16} fontWeight={700} color="#fff" textAlign="center" sx={{
                   textShadow: '0 1px 5px rgba(0,0,0,0.3)',
-                  fontSize: { xs: '1.1rem', md: '1.3rem' },
+                  fontSize: { xs: '0.9rem', sm: '1rem', md: '1.2rem', lg: '1.3rem' },
                   width: 'fit-content',
-                  px: 2,
-                  py: 0.5,
+                  px: { xs: 1.5, sm: 2 },
+                  py: { xs: 0.3, sm: 0.5 },
                   borderRadius: 2,
                   bgcolor: 'rgba(255,255,255,0.1)',
                   backdropFilter: 'blur(5px)'
@@ -387,7 +387,7 @@ const Home = () => {
             <Typography variant="h6" sx={{ 
               color: '#fff', 
               mb: 3,
-              fontSize: { xs: '1.2rem', md: '1.4rem' },
+              fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
               textShadow: '0 1px 5px rgba(0,0,0,0.3)'
             }}>
               Сколько времени у тебя есть?
@@ -425,10 +425,10 @@ const Home = () => {
                   }}>
                     <AccessTimeIcon sx={{ 
                       color: time === option.value ? '#fff' : '#A9CBA4',
-                      fontSize: { xs: '1.5rem', md: '2rem' }
+                      fontSize: { xs: '1.2rem', sm: '1.5rem', md: '2rem' }
                     }} />
                     <Typography sx={{ 
-                      fontSize: { xs: '0.8rem', md: '0.9rem' },
+                      fontSize: { xs: '0.7rem', sm: '0.8rem', md: '0.9rem' },
                       fontWeight: 600,
                       color: time === option.value ? '#fff' : '#333'
                     }}>
@@ -445,7 +445,7 @@ const Home = () => {
             <Typography variant="h6" sx={{ 
               color: '#fff', 
               mb: 3,
-              fontSize: { xs: '1.2rem', md: '1.4rem' },
+              fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
               textShadow: '0 1px 5px rgba(0,0,0,0.3)'
             }}>
               Какой бюджет?
@@ -468,7 +468,7 @@ const Home = () => {
                   max: maxBudget,
                   style: { 
                     textAlign: 'center', 
-                    fontSize: { xs: '1rem', md: '1.1rem' },
+                    fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
                     fontWeight: 600
                   } 
                 }}
@@ -494,6 +494,7 @@ const Home = () => {
                   '& .MuiInputLabel-root': {
                     color: '#666',
                     fontWeight: 600,
+                    fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' },
                     '&.Mui-focused': {
                       color: '#FFD60A',
                     }
@@ -503,7 +504,7 @@ const Home = () => {
               <Typography sx={{ 
                 color: '#fff', 
                 fontWeight: 700, 
-                fontSize: { xs: '1.2rem', md: '1.4rem' },
+                fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
                 textShadow: '0 1px 5px rgba(0,0,0,0.3)'
               }}>
                 —
@@ -519,7 +520,7 @@ const Home = () => {
                   max: 10000,
                   style: { 
                     textAlign: 'center', 
-                    fontSize: { xs: '1rem', md: '1.1rem' },
+                    fontSize: { xs: '0.9rem', sm: '1rem', md: '1.1rem' },
                     fontWeight: 600
                   } 
                 }}
@@ -545,6 +546,7 @@ const Home = () => {
                   '& .MuiInputLabel-root': {
                     color: '#666',
                     fontWeight: 600,
+                    fontSize: { xs: '0.8rem', sm: '0.9rem', md: '1rem' },
                     '&.Mui-focused': {
                       color: '#FFD60A',
                     }
@@ -554,7 +556,7 @@ const Home = () => {
               <Typography sx={{ 
                 color: '#fff', 
                 fontWeight: 700, 
-                fontSize: { xs: '1.2rem', md: '1.4rem' },
+                fontSize: { xs: '1rem', sm: '1.2rem', md: '1.4rem' },
                 textShadow: '0 1px 5px rgba(0,0,0,0.3)'
               }}>
                 ₽
