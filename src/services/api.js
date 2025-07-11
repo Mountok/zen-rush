@@ -188,4 +188,13 @@ export const historyAPI = {
   }
 };
 
+// Статистика настроения пользователя
+export const usersAPI = {
+  // Получить статистику настроения за N дней
+  getMoodStats: async (days = 7) => {
+    const response = await api.get(`/users/me/mood-stats?days=${days}`);
+    return response.data;
+  }
+};
+
 export default api; 

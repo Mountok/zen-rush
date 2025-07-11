@@ -11,6 +11,23 @@ import Alert from '@mui/material/Alert';
 import ActivityCard from '../components/ActivityCard';
 import { favoritesAPI, historyAPI, authAPI } from '../services/api';
 import { userService } from '../services/userService';
+import MoodStatsChart from '../components/MoodStatsChart';
+import { usersAPI } from '../services/api';
+import SentimentVeryDissatisfiedIcon from '@mui/icons-material/SentimentVeryDissatisfied';
+import SentimentDissatisfiedIcon from '@mui/icons-material/SentimentDissatisfied';
+import SentimentNeutralIcon from '@mui/icons-material/SentimentNeutral';
+import SentimentSatisfiedIcon from '@mui/icons-material/SentimentSatisfied';
+import SentimentVerySatisfiedIcon from '@mui/icons-material/SentimentVerySatisfied';
+
+const MOOD_OPTIONS = [
+  { label: "Очень грустно", icon: <SentimentVeryDissatisfiedIcon />, color: "#4A90E2" },
+  { label: "Грустно", icon: <SentimentDissatisfiedIcon />, color: "#A0A0A0" },
+  { label: "Спокойно", icon: <SentimentNeutralIcon />, color: "#A3BFFA" },
+  { label: "Нейтрально", icon: <SentimentNeutralIcon />, color: "#FFD60A" },
+  { label: "Хорошо", icon: <SentimentSatisfiedIcon />, color: "#A9CBA4" },
+  { label: "Весело", icon: <SentimentVerySatisfiedIcon />, color: "#4CD964" },
+  { label: "Вдохновлён", icon: <SentimentVerySatisfiedIcon />, color: "#FF9500" },
+];
 
 function getInitials(name) {
   return name.split(' ').map(w => w[0]).join('').toUpperCase();
@@ -21,6 +38,12 @@ const Profile = () => {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Состояния для статистики настроения
+  const [moodStats, setMoodStats] = useState([]);
+  const [moodLoading, setMoodLoading] = useState(false);
+  const [moodPeriod, setMoodPeriod] = useState(7);
+  const moodPeriods = [7, 14, 30];
 
   // Получаем информацию о пользователе
   const currentUser = userService.getCurrentUser();
@@ -77,6 +100,32 @@ const Profile = () => {
     loadData();
   }, []);
 
+  // Получить статистику настроения
+  const fetchMoodStats = async (days) => {
+    setMoodLoading(true);
+    try {
+      const stats = await usersAPI.getMoodStats(days);
+      // Преобразуем дату к YYYY-MM-DD
+      const data = stats.map(item => ({
+        date: item.date.slice(0, 10),
+        mood: item.mood
+      }));
+      setMoodStats(data);
+    } catch (err) {
+      setMoodStats([]);
+    } finally {
+      setMoodLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMoodStats(moodPeriod);
+  }, [moodPeriod]);
+
+  // Список настроений и цвета для графика
+  const moodsList = MOOD_OPTIONS.map(m => m.label);
+  const moodColors = Object.fromEntries(MOOD_OPTIONS.map(m => [m.label, m.color]));
+
   // Удалить из избранного
   const handleRemoveFavorite = async (activityId) => {
     try {
@@ -103,10 +152,10 @@ const Profile = () => {
       {/* Шапка профиля */}
       <Paper elevation={4} sx={{
         width: '100%',
-        maxWidth: { xs: 420, md: 600, lg: 800 },
+        maxWidth: { xs: '100%', md: 360, lg: 480 },
         mx: 'auto',
         borderRadius: 2,
-        p: { xs: 2, md: 3 },
+        p: { xs: 1, md: 3 },
         mb: 2,
         background: 'linear-gradient(90deg, #F5F5F5 0%, #E6ECEF 100%)',
         display: 'flex',
@@ -131,8 +180,20 @@ const Profile = () => {
         }}>{USER.status}</Typography>
         <Chip label={USER.role} size="small" sx={{ bgcolor: '#fff', color: '#4A4039', fontWeight: 600, fontSize: 13 }} />
       </Paper>
+      {/* График настроения */}
+      <Box sx={{ width: '100%', maxWidth: { xs: '100%', md: 360, lg: 480 }, mx: 'auto', mb: 2, px: { xs: 1, md: 0 } }}>
+        <MoodStatsChart
+          data={moodStats}
+          moodsList={moodsList}
+          colors={moodColors}
+          loading={moodLoading}
+          period={moodPeriod}
+          onPeriodChange={setMoodPeriod}
+          periods={moodPeriods}
+        />
+      </Box>
       {/* Избранное */}
-      <Box sx={{ width: '100%', maxWidth: { xs: 420, md: 600, lg: 800 }, mx: 'auto', mb: 2, px: 0 }}>
+      <Box sx={{ width: '100%', maxWidth: { xs: '100%', md: 360, lg: 480 }, mx: 'auto', mb: 2, px: { xs: 1, md: 0 } }}>
         <Typography fontWeight={700} fontSize={{ xs: 18, md: 20 }} mb={1} color="#213547">Избранное</Typography>
         
         {loading ? (
@@ -174,7 +235,7 @@ const Profile = () => {
         )}
       </Box>
       {/* История */}
-      <Box sx={{ width: '100%', maxWidth: { xs: 420, md: 600, lg: 800 }, mx: 'auto', mb: 2, px: 0 }}>
+      <Box sx={{ width: '100%', maxWidth: { xs: '100%', md: 360, lg: 480 }, mx: 'auto', mb: 2, px: { xs: 1, md: 0 } }}>
         <Typography fontWeight={700} fontSize={{ xs: 18, md: 20 }} mb={1} color="#213547">История</Typography>
         {history.length === 0 ? (
           <Typography color="#888" fontSize={15}>Нет истории просмотров.</Typography>
